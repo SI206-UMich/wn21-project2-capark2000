@@ -92,8 +92,19 @@ def summarize_best_books(filepath):
     ("Fiction", "The Testaments (The Handmaid's Tale, #2)", "https://www.goodreads.com/choiceawards/best-fiction-books-2020") 
     to your list of tuples.
     """
-    pass
-
+    ourList = []
+    with open(os.path.join(filepath, "best_books_2020.htm")) as fhand:
+        soup = BeautifulSoup(fhand, 'html.parser')
+        div = soup.find_all('div', class_ = 'category clearFix')
+        for item in data:
+            a = item.h4.text.strip()
+            b = item.find('div', class_ = "category_winnerImageContainer")
+            c = b.find("img", alt = True)
+            d = c["alt"]
+            link = item.find("a").get("href")
+            ourTup = (a, d, link)
+            ourList.append(ourTup)
+    return ourList
 
 def write_csv(data, filename):
     """
