@@ -44,8 +44,17 @@ def get_search_links():
     “https://www.goodreads.com/book/show/kdkd".
 
     """
-
-    pass
+    url = "https://www.goodreads.com/search?q=fantasy&qid=NwUsLiA2Nc"
+    resp = requests.get(url)
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    links = soup.find_all('a', class_ = "bookTitle", itemprop = 'url')
+    ourList = []
+    for link in links: 
+        tag = link['href']
+        if tag.startwith('/book/show/'):
+            newUrl = 'https://www.goodreads.com' + str(tag)
+            ourList.append(newUrl)
+    return ourList[:10]
 
 
 def get_book_summary(book_url):
