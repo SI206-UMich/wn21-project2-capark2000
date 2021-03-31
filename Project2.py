@@ -70,8 +70,15 @@ def get_book_summary(book_url):
     You can easily capture CSS selectors with your browser's inspector window.
     Make sure to strip() any newlines from the book title and number of pages.
     """
-
-    pass
+    resp = requests.get(book_url)
+    if resp.ok:
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        tag = soup.find('h1', id = "bookTitle").string.strip()
+        a = soup.find('a', {'class' : 'authorName'}).string.strip()
+        pageNum = int(soup.find('span', itemprop = "numberOfPages").string.strip("pages"))
+    ourTup = (tag, a, pageNum)
+    return ourTup
+    
 
 
 def summarize_best_books(filepath):
