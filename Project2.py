@@ -19,7 +19,7 @@ def get_titles_from_search_results(filename):
     soup = BeautifulSoup(fhand, "html.parser")
     fhand.close()
     anchor = soup.find('div', class_ = "mainContentContainer")
-    bookList = div.find_all("tr")
+    bookList = anchor.find_all("tr")
     for book in bookList:
         title = book.find('a', class_ = "bookTitle")
         titleText = title.find("span").titleText
@@ -51,7 +51,7 @@ def get_search_links():
     ourList = []
     for link in links: 
         tag = link['href']
-        if tag.startwith('/book/show/'):
+        if tag.startswith('/book/show/'):
             newUrl = 'https://www.goodreads.com' + str(tag)
             ourList.append(newUrl)
     return ourList[:10]
@@ -96,7 +96,7 @@ def summarize_best_books(filepath):
     with open(os.path.join(filepath, "best_books_2020.htm")) as fhand:
         soup = BeautifulSoup(fhand, 'html.parser')
         div = soup.find_all('div', class_ = 'category clearFix')
-        for item in data:
+        for item in div:
             a = item.h4.text.strip()
             b = item.find('div', class_ = "category_winnerImageContainer")
             c = b.find("img", alt = True)
@@ -123,10 +123,38 @@ def write_csv(data, filename):
     Book2,Author2
     Book3,Author3
     ......
+    [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
 
     This function should not return anything.
     """
-    pass
+    print('first')
+    with open(filename, "w", newline = '') as fhand:
+        csv_writer = csv.writer(fhand)
+        print('second')
+        for tup in data: 
+            print('third')
+            book = tup[0]
+            author = tup[1]
+            line = "{book},{author}"
+            print('fourth')
+            print(line)
+            csv_writer.writerow(line)
+    print(filename)
+    return filename
+
+"""
+        wordCount = len(self.words())
+        wordsNoStops = self.word_count()
+        lineCount = len(self.lines)
+        mostCommonWord = self.most_common()
+        row = [self.filepath, wordCount, wordsNoStops, lineCount, mostCommonWord[0]]
+        with open(csvfile, "w", newline = '') as fhand:
+            csv_writer = csv.writer(fhand)
+            csv_writer.writerow(self.read_sample_csv())
+            csv_writer.writerow(row)
+        return csvfile
+        """
+
 
 
 def extra_credit(filepath):
@@ -141,20 +169,22 @@ def extra_credit(filepath):
 class TestCases(unittest.TestCase):
 
     # call get_search_links() and save it to a static variable: search_urls
-
+    search_urls = get_search_links()
 
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() on search_results.htm and save to a local variable
-
+        titles = get_titles_from_search_results("search_results.htm")
         # check that the number of titles extracted is correct (20 titles)
-
+        self.assertEqual(len(titles), 20)
         # check that the variable you saved after calling the function is a list
-
+        self.assertEqual(type(titles), list)
         # check that each item in the list is a tuple
-
+        for item in titles:
+            self.assertEqual(type(item), tuple)
         # check that the first book and author tuple is correct (open search_results.htm and find it)
-
+        self.assertEqual(titles[0], "Harry Potter and the Deathly Hallows")
         # check that the last title is correct (open search_results.htm and find it)
+        self.assertEqual(titles[-1], "Harry Potter: The Prequel (Harry Potter, #0.5")
 
     def test_get_search_links(self):
         # check that TestCases.search_urls is a list
@@ -164,6 +194,7 @@ class TestCases(unittest.TestCase):
 
         # check that each URL in the TestCases.search_urls is a string
         # check that each URL contains the correct url for Goodreads.com followed by /book/show/
+        pass
 
 
     def test_get_book_summary(self):
@@ -181,6 +212,7 @@ class TestCases(unittest.TestCase):
             # check that the third element in the tuple, i.e. pages is an int
 
             # check that the first book in the search has 337 pages
+        pass
 
 
     def test_summarize_best_books(self):
@@ -195,23 +227,26 @@ class TestCases(unittest.TestCase):
         # check that the first tuple is made up of the following 3 strings:'Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
 
         # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'A Beautiful Day in the Neighborhood: The Poetry of Mister Rogers', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
-
+        pass
 
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
-
+        dir = os.path.dirname(__file__)
+        books = summarize_best_books(dir)
         # call write csv on the variable you saved and 'test.csv'
-
+        write_csv(books, 'best_books_2020.csv')
         # read in the csv that you wrote (create a variable csv_lines - a list containing all the lines in the csv you just wrote to above)
-
+        ourFile = (open(os.path.join(dir, 'best_books_2020.csv'), 'r')).readlines()
 
         # check that there are 21 lines in the csv
-
+        self.assertEqual(len(ourFile), 21)
         # check that the header row is correct
-
+        self.assertEqual(ourFile[0].strip(), "Book Title,Author Name")
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
+        self.assertEqual(ourFile[1].strip(), "Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling")
 
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)'
+        self.assertEqual(ourFile[-1].strip(), "Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)")
 
 
 
