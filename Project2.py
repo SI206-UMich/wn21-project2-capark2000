@@ -16,17 +16,28 @@ def get_titles_from_search_results(filename):
     """
     ourList = []
     fhand = open(filename)
-    soup = BeautifulSoup(fhand, "html.parser")
+    f = fhand.read()
+    soup = BeautifulSoup(f, 'lxml')
     fhand.close()
     anchor = soup.find('div', class_ = "mainContentContainer")
     bookList = anchor.find_all("tr")
     for book in bookList:
         title = book.find('a', class_ = "bookTitle")
-        titleText = title.find("span").titleText
+        titleText = title.find("span").text
         author = book.find("a", class_ = "authorName")
         authorText = author.find("span").text
         ourTup = (titleText, authorText)
         ourList.append(ourTup)
+    """
+    ourList = []
+    soup = BeautifulSoup(open('search_results.htm', 'html.parser')
+    for book in soup.findAll('tr', itemtype = 'http://schema.org/Book'):
+        data = book.findAll('span', itemprop = 'name')
+        title = data[0].string.strip()
+        author = data[1].string.strip
+        ourTup = (title, author)
+        ourList.append(ourTup)
+    """
 
     return ourList
 
@@ -164,9 +175,9 @@ class TestCases(unittest.TestCase):
         for item in titles:
             self.assertEqual(type(item), tuple)
         # check that the first book and author tuple is correct (open search_results.htm and find it)
-        self.assertEqual(titles[0], "Harry Potter and the Deathly Hallows")
+        self.assertEqual(titles[0], ("Harry Potter and the Deathly Hallows (Harry Potter, #7)", "J.K. Rowling"))
         # check that the last title is correct (open search_results.htm and find it)
-        self.assertEqual(titles[-1], "Harry Potter: The Prequel (Harry Potter, #0.5")
+        self.assertEqual(titles[-1][0], "Harry Potter: The Prequel (Harry Potter, #0.5)")
 
     def test_get_search_links(self):
         # check that TestCases.search_urls is a list
