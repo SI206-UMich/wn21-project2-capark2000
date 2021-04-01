@@ -28,16 +28,6 @@ def get_titles_from_search_results(filename):
         authorText = author.find("span").text
         ourTup = (titleText, authorText)
         ourList.append(ourTup)
-    """
-    ourList = []
-    soup = BeautifulSoup(open('search_results.htm', 'html.parser')
-    for book in soup.findAll('tr', itemtype = 'http://schema.org/Book'):
-        data = book.findAll('span', itemprop = 'name')
-        title = data[0].string.strip()
-        author = data[1].string.strip
-        ourTup = (title, author)
-        ourList.append(ourTup)
-    """
 
     return ourList
 
@@ -141,12 +131,9 @@ def write_csv(data, filename):
     """
     with open(filename, "w", newline = '') as fhand:
         csv_writer = csv.writer(fhand)
+        csv_writer.writerow(("Book Title","Author Name"))
         for tup in data: 
-            book = tup[0]
-            author = tup[1]
-            line = book + ',' + author
-            csv_writer.writerow(line)
-    return filename
+            csv_writer.writerow(tup)
 
 
 
@@ -232,7 +219,7 @@ class TestCases(unittest.TestCase):
         self.assertEqual(books[0][1], 'The Midnight Library')
         self.assertEqual(books[0][2], 'https://www.goodreads.com/choiceawards/best-fiction-books-2020')
 
-        # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'A Beautiful Day in the Neighborhood: The Poetry of Mister Rogers', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
+        # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
         self.assertEqual(books[-1][0], 'Picture Books')
         self.assertEqual(books[-1][1], 'Antiracist Baby')
         self.assertEqual(books[-1][2], 'https://www.goodreads.com/choiceawards/best-picture-books-2020')
@@ -240,22 +227,28 @@ class TestCases(unittest.TestCase):
 
     def test_write_csv(self):
         # call get_titles_from_search_results on search_results.htm and save the result to a variable
-        dir = os.path.dirname(__file__)
-        books = summarize_best_books(dir)
+            #dir = os.path.dirname(__file__)
+        books = get_titles_from_search_results("search_results.htm")
         # call write csv on the variable you saved and 'test.csv'
-        write_csv(books, 'best_books_2020.csv')
+            #write_csv(books, 'best_books_2020.csv')
+        write_csv(books, 'test.csv')
         # read in the csv that you wrote (create a variable csv_lines - a list containing all the lines in the csv you just wrote to above)
-        ourFile = (open(os.path.join(dir, 'best_books_2020.csv'), 'r')).readlines()
-
+            #ourFile = (open(os.path.join(dir, 'best_books_2020.csv'), 'r')).readlines()
+        fhand = open('test.csv', 'r')
+        csv_lines = fhand.readlines()
+        newList = []
+        for line in csv_lines:
+            line = line.rstrip()
+            newList.append(line)
         # check that there are 21 lines in the csv
-        self.assertEqual(len(ourFile), 21)
+        self.assertEqual(len(csv_lines), 21)
         # check that the header row is correct
-        self.assertEqual(ourFile[0].strip(), "Book Title,Author Name")
+        self.assertEqual(csv_lines[0].strip(), "Book Title,Author Name")
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
-        self.assertEqual(ourFile[1].strip(), "Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling")
+        self.assertEqual(csv_lines[1].strip(), '"Harry Potter and the Deathly Hallows (Harry Potter, #7)",J.K. Rowling')
 
         # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)'
-        self.assertEqual(ourFile[-1].strip(), "Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)")
+        self.assertEqual(csv_lines[-1].strip(), '"Harry Potter: The Prequel (Harry Potter, #0.5)",J.K. Rowling')
 
 
 
