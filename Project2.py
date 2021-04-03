@@ -5,6 +5,8 @@ import os
 import csv
 import unittest
 
+# I worked on this project with Liz Tierney and Olivia Zwierzchowski
+
 
 def get_titles_from_search_results(filename):
     """
